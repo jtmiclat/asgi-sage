@@ -26,6 +26,7 @@ class SageMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        headers = scope["headers"]
-
-    return await self.app(scope, receive, send)
+        if scrope["type"] != "http":
+            return await self.app(scope, receive, send)
+        else:
+            print("Http headers")
