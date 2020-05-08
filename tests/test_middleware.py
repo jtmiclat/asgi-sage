@@ -3,6 +3,7 @@ from starlette.applications import Starlette
 from starlette.responses import PlainTextResponse
 from starlette.testclient import TestClient
 
+from asgi_sage.middleware import SageMiddleware
 
 @pytest.fixture
 def app():
@@ -20,6 +21,7 @@ def app():
 
 
 def test_init(app):
+    app.add_middleware(SageMiddleware)
     client = TestClient(app)
     response = client.get("/sync-message")
     assert response.status_code == 200
