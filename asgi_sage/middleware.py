@@ -40,7 +40,7 @@ class SageMiddleware:
         def send_wrapper(response):
             headers = response.get("headers")
             if headers and self.frame_options:
-                headers.append((b"X-Frame-Options", self.frame_options.encode()))
+                headers.append((b"x-frame-options", self.frame_options.encode()))
             return send(response)
 
         def receive_wrapper(request):
