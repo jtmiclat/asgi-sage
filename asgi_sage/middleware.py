@@ -1,6 +1,9 @@
 from typing import Optional
 
 
+FRAME_OPTIONS = ["SAMEORIGIN", "DENY"]
+
+
 class SageMiddleware:
     def __init__(
         self,
@@ -24,11 +27,20 @@ class SageMiddleware:
         force_file_save: bool = False,
     ) -> None:
         self.app = app
+        if frame_options is not None and frame_options not in FRAME_OPTIONS:
+            raise ValueError(
+                f"{frame_options} is invalid. Possible values: {FRAME_OPTIONS}"
+            )
+        self.frame_options = frame_options
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
+
         def send_wrapper(response):
+            headers = response.get("headers")
+            if headers and self.frame_options:
+                headers.append((b"X-Frame-Options", self.frame_options.encode()))
             return send(response)
 
         def receive_wrapper(request):
