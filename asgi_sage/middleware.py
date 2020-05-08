@@ -26,10 +26,12 @@ class SageMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        if scrope["type"] != "http":
+        if scope["type"] != "http":
             return await self.app(scope, receive, send)
         def send_wrapper(response):
-            import pdb; pdb.set_trace()
             return send(response)
+
+        def receive_wrapper(request):
+            return receive(request)
 
         return await self.app(scope, receive, send_wrapper)
