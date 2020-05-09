@@ -25,6 +25,27 @@ class SageMiddleware:
         self.strict_transport_security_preload: bool = strict_transport_security_preload
         self.strict_transport_security_max_age: int = strict_transport_security_max_age
         self.referrer_policy: Optional[bytes]= referrer_policy.encode() if referrer_policy else referrer_policy
+        self.session_cookie_secure: bool = session_cookie_secure
+        self.session_cookie_http_only: bool = session_cookie_http_only
+
+    def _set_frame_options(self, headers: list) -> list:
+        if self.frame_options:
+            headers.append((b"x-frame-options", self.frame_options))
+        return headers
+
+    def _set_strict_transport_security(self, headers: list) -> list:
+        if self.strict_transport_security:
+            header_content = b"max_age:" + str(self.strict_transport_security_max_age).encode()
+            if self.strict_transport_security_preload:
+                header_content += b"; preload"
+            strict_transport_headers = (b"strict-transport-security", header_content)
+            headers.append(strict_transport_headers)
+        return headers
+
+    def _set_referrer_policy(self, headers: list) -> list:
+        if self.referrer_policy:
+            headers.append((b"referrer-policy", self.referrer_policy))
+        return headers
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -33,17 +54,9 @@ class SageMiddleware:
         def send_wrapper(response):
             headers = response.get("headers")
             if headers:
-                if self.frame_options:
-                    headers.append((b"x-frame-options", self.frame_options))
-                if self.strict_transport_security:
-                    header_content = b"max_age:" + str(self.strict_transport_security_max_age).encode()
-                    if self.strict_transport_security_preload:
-                        header_content += b"; preload"
-                    strict_transport_headers = (b"strict-transport-security", header_content)
-                    headers.append(strict_transport_headers)
-
-                if self.referrer_policy:
-                    headers.append((b"referrer-policy", self.referrer_policy))
+                self._set_frame_options(headers)
+                self._set_strict_transport_security(headers)
+                self._set_referrer_policy(headers)
             return send(response)
 
         def receive_wrapper(request):
