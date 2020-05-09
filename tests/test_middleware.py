@@ -68,3 +68,59 @@ def test_x_frame_options_none(app):
 def test_x_frame_options_invalid(app):
     with pytest.raises(ValueError):
         app.add_middleware(SageMiddleware, frame_options="ALL")
+
+def test_strict_transport_security_true(app):
+    app.add_middleware(SageMiddleware)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert "strict-transport-security" in response.headers
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "strict-transport-security" in response.headers
+
+def test_strict_transport_security_false(app):
+    app.add_middleware(SageMiddleware, strict_transport_security=False)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert "strict-transport-security" not in response.headers
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "strict-transport-security" not in response.headers
+
+
+def test_strict_transport_security_max_age_default(app):
+    app.add_middleware(SageMiddleware)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert str(60*60*24*365) in response.headers["strict-transport-security"]
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert str(60*60*24*365)  in response.headers["strict-transport-security"]
+
+def test_strict_transport_security_max_age_set(app):
+    app.add_middleware(SageMiddleware, strict_transport_security_max_age=1000)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert str(1000) in response.headers["strict-transport-security"]
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert str(1000) in response.headers["strict-transport-security"]
+
+def test_strict_transport_security_preload_default(app):
+    app.add_middleware(SageMiddleware)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert "preload" not in response.headers["strict-transport-security"]
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "preload" not in response.headers["strict-transport-security"]
+
+def test_strict_transport_security_preload_true(app):
+    app.add_middleware(SageMiddleware, strict_transport_security_preload=True)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert 'preload' in response.headers["strict-transport-security"]
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert 'preload' in response.headers["strict-transport-security"]

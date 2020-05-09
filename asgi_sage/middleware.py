@@ -8,11 +8,9 @@ class SageMiddleware:
     def __init__(
         self,
         app,
-        feature_policy: dict = {},
-        force_https: bool = True,
+        feature_policy: dict = {}, force_https: bool = True,
         force_https_permanent: bool = False,
         frame_options: Optional[str] = "SAMEORIGIN",
-        frame_options_allow_from: Optional[str] = None,
         strict_transport_security: bool = True,
         strict_transport_security_preload: bool = False,
         strict_transport_security_max_age: int = 60 * 60 * 24 * 365,
@@ -31,7 +29,10 @@ class SageMiddleware:
             raise ValueError(
                 f"{frame_options} is invalid. Possible values: {FRAME_OPTIONS}"
             )
-        self.frame_options = frame_options
+        self.frame_options: Optional[bytes] = frame_options.encode() if frame_options else frame_options
+        self.strict_transport_security: bool  = strict_transport_security
+        self.strict_transport_security_preload: bool = strict_transport_security_preload
+        self.strict_transport_security_max_age: int = strict_transport_security_max_age
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -39,8 +40,16 @@ class SageMiddleware:
 
         def send_wrapper(response):
             headers = response.get("headers")
-            if headers and self.frame_options:
-                headers.append((b"x-frame-options", self.frame_options.encode()))
+            if headers:
+                if self.frame_options:
+                    headers.append((b"x-frame-options", self.frame_options))
+                if self.strict_transport_security:
+                    header_content = b"max_age:" + str(self.strict_transport_security_max_age).encode()
+                    if self.strict_transport_security_preload:
+                        header_content += b"; preload"
+                    strict_transport_headers = (b"strict-transport-security", header_content)
+                    headers.append(strict_transport_headers)
+
             return send(response)
 
         def receive_wrapper(request):
