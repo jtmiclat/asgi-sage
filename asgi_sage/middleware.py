@@ -1,9 +1,5 @@
 from typing import Optional
 
-
-FRAME_OPTIONS = ["SAMEORIGIN", "DENY"]
-
-
 class SageMiddleware:
     def __init__(
         self,
@@ -18,21 +14,17 @@ class SageMiddleware:
         content_security_policy_nonce_in: list = [],
         content_security_policy_report_only: bool = False,
         content_security_policy_report_uri: Optional[str] = None,
-        legacy_content_security_policy_header: bool = True,
-        referrer_policy: str = "strict-origin-when-cross-origin",
+        referrer_policy: Optional[str] = "strict-origin-when-cross-origin",
         session_cookie_secure: bool = True,
         session_cookie_http_only: bool = True,
         force_file_save: bool = False,
     ) -> None:
         self.app = app
-        if frame_options is not None and frame_options not in FRAME_OPTIONS:
-            raise ValueError(
-                f"{frame_options} is invalid. Possible values: {FRAME_OPTIONS}"
-            )
         self.frame_options: Optional[bytes] = frame_options.encode() if frame_options else frame_options
         self.strict_transport_security: bool  = strict_transport_security
         self.strict_transport_security_preload: bool = strict_transport_security_preload
         self.strict_transport_security_max_age: int = strict_transport_security_max_age
+        self.referrer_policy: Optional[bytes]= referrer_policy.encode() if referrer_policy else referrer_policy
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -50,6 +42,8 @@ class SageMiddleware:
                     strict_transport_headers = (b"strict-transport-security", header_content)
                     headers.append(strict_transport_headers)
 
+                if self.referrer_policy:
+                    headers.append((b"referrer-policy", self.referrer_policy))
             return send(response)
 
         def receive_wrapper(request):

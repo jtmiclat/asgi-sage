@@ -64,11 +64,6 @@ def test_x_frame_options_none(app):
     assert response.status_code == 200
     assert "X-Frame-Options" not in response.headers
 
-
-def test_x_frame_options_invalid(app):
-    with pytest.raises(ValueError):
-        app.add_middleware(SageMiddleware, frame_options="ALL")
-
 def test_strict_transport_security_true(app):
     app.add_middleware(SageMiddleware)
     client = TestClient(app)
@@ -124,3 +119,40 @@ def test_strict_transport_security_preload_true(app):
     response = client.get("/async-message")
     assert response.status_code == 200
     assert 'preload' in response.headers["strict-transport-security"]
+
+
+def test_referrer_policy_default(app):
+    app.add_middleware(SageMiddleware)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+
+
+def test_referrer_policy_origin(app):
+    app.add_middleware(SageMiddleware, referrer_policy="origin")
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert response.headers["X-Frame-Options"] == "SAMEORIGIN"
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert response.headers["X-Frame-Options"] == "SAMEORIGIN"
+
+
+
+
+def test_referrer_policy_none(app):
+    app.add_middleware(SageMiddleware, referrer_policy=None)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert "Referrer-Policy" not in response.headers
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "Referrer-Policy" not in response.headers
+
+
