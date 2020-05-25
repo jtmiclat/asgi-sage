@@ -1,9 +1,12 @@
 [tool.poetry]
 name = "asgi-sage"
-version = "0.1.0a"
+version = "0.1.0a1"
 description = "Security Headers for asgi apps"
 authors = ["Jt Miclat <jtmiclat@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/jtmiclat/asgi-sage"
+repository = "https://github.com/jtmiclat/asgi-sage" 
 
 [tool.poetry.dependencies]
 python = "^3.6"
