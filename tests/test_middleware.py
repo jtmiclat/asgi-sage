@@ -344,3 +344,19 @@ def test_session_cookie_http_only_false(app):
     response = client.get("/sync-message")
     assert response.status_code == 200
     assert all([v.has_nonstandard_attr("httponly") for v in response.cookies]) is False
+
+
+def test_content_type_nosniff_true(app):
+    app.add_middleware(SageMiddleware, content_type_nosniff=True)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_content_type_nosniff_false(app):
+    app.add_middleware(SageMiddleware, content_type_nosniff=False)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert "X-Content-Type-Options" not in response.headers

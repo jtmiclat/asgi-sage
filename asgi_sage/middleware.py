@@ -17,7 +17,7 @@ class SageMiddleware:
         referrer_policy: Optional[str] = "strict-origin-when-cross-origin",
         session_cookie_secure: bool = True,
         session_cookie_http_only: bool = True,
-        force_file_save: bool = False,
+        content_type_nosniff: bool = False,
     ) -> None:
         self.app = app
         self.feature_policy: Optional[dict] = feature_policy
@@ -35,6 +35,8 @@ class SageMiddleware:
         self.referrer_policy: Optional[str] = referrer_policy
         self.session_cookie_secure: bool = session_cookie_secure
         self.session_cookie_http_only: bool = session_cookie_http_only
+
+        self.content_type_nosniff: bool = content_type_nosniff
 
     def _set_frame_options(self, headers: list) -> list:
         if self.frame_options:
@@ -97,6 +99,11 @@ class SageMiddleware:
                 headers[key] = (header[0], value)
         return headers
 
+    def _set_content_type(self, headers: list) -> list:
+        if self.content_type_nosniff:
+            headers.append((b"x-content-type-options", b"nosniff"))
+        return headers
+
     async def redirect_to_https(self, scope, send):
         hostname = next(filter(lambda x: x[0] == b"host", scope["headers"]))[1]
         await send(
@@ -125,6 +132,7 @@ class SageMiddleware:
                 self._set_referrer_policy(headers)
                 self._set_content_security_policy(headers)
                 self._set_cookie(headers)
+                self._set_content_type(headers)
             return send(response)
 
         return await self.app(scope, receive, send_wrapper)
