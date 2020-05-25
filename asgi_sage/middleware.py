@@ -95,6 +95,7 @@ class SageMiddleware:
                 if self.session_cookie_http_only:
                     value += b"; httponly"
                 headers[key] = (header[0], value)
+        return headers
 
     async def redirect_to_https(self, scope, send):
         hostname = next(filter(lambda x: x[0] == b"host", scope["headers"]))[1]
