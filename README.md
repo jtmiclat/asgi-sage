@@ -44,3 +44,10 @@ app = SageMiddleware(app)
 - [ ] Per Request overriding
 - [ ] Add tests for different ASGI frameworks like [Quart](https://pgjones.gitlab.io/quart/) and [Django 3.0+](https://docs.djangoproject.com/en/3.0/topics/async/)
 - [ ] Properly support websockets
+
+- [ ] Add Code Coverage
+- [ ] Auto Changelog
+
+## License
+
+MIT
