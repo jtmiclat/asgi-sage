@@ -23,9 +23,7 @@ class SageMiddleware:
         self.feature_policy: Optional[dict] = feature_policy
         self.force_https: bool = force_https
         self.force_https_permanent: bool = force_https_permanent
-        self.frame_options: Optional[
-            bytes
-        ] = frame_options.encode() if frame_options else frame_options
+        self.frame_options: Optional[str] = frame_options
 
         self.strict_transport_security: bool = strict_transport_security
         self.strict_transport_security_preload: bool = strict_transport_security_preload
@@ -34,15 +32,13 @@ class SageMiddleware:
 
         self.content_security_policy: Optional[dict] = content_security_policy
 
-        self.referrer_policy: Optional[
-            bytes
-        ] = referrer_policy.encode() if referrer_policy else referrer_policy
+        self.referrer_policy: Optional[str] = referrer_policy
         self.session_cookie_secure: bool = session_cookie_secure
         self.session_cookie_http_only: bool = session_cookie_http_only
 
     def _set_frame_options(self, headers: list) -> list:
         if self.frame_options:
-            headers.append((b"x-frame-options", self.frame_options))
+            headers.append((b"x-frame-options", self.frame_options.encode()))
         return headers
 
     def _set_strict_transport_security(self, headers: list) -> list:
@@ -60,7 +56,7 @@ class SageMiddleware:
 
     def _set_referrer_policy(self, headers: list) -> list:
         if self.referrer_policy:
-            headers.append((b"referrer-policy", self.referrer_policy))
+            headers.append((b"referrer-policy", self.referrer_policy.encode()))
         return headers
 
     def _set_feature_policy(self, headers: list) -> list:
@@ -91,7 +87,6 @@ class SageMiddleware:
         return headers
 
     def _set_cookie(self, headers: list) -> list:
-
         for key, header in enumerate(headers):
             if header[0] == b"set-cookie":
                 value = header[1]
@@ -100,6 +95,7 @@ class SageMiddleware:
                 if self.session_cookie_http_only:
                     value += b"; httponly"
                 headers[key] = (header[0], value)
+        return headers
 
     async def redirect_to_https(self, scope, send):
         hostname = next(filter(lambda x: x[0] == b"host", scope["headers"]))[1]
