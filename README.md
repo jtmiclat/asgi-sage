@@ -1,6 +1,28 @@
 # asgi-sage
 
+[![Package version](https://badge.fury.io/py/asgi-sage.svg)](https://pypi.org/project/asgi-sage)
+
 Security Headers Middleware for Asgi App heavily inspired by [flask-talisman](https://github.com/GoogleCloudPlatform/flask-talisman)
+
+## Installation
+
+```
+pip install asgi-sage
+```
+
+## Usage
+
+```
+from asgi_sage.middleware import SageMiddleware
+
+async def app(scope, receive, send):
+    assert scope["type"] == "http"
+    headers = [(b"content-type", "text/plain")]
+    await send({"type": "http.response.start", "status": 200, "headers": headers})
+    await send({"type": "http.response.body", "body": b"Hello, world!"})
+
+app = SageMiddleware(app)
+```
 
 ## Options
 
