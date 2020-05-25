@@ -1,5 +1,6 @@
-# asgi-sage
-
+<p align="center">
+<h1> 🧙 asgi-sage </h1>
+</p>
 <p align="center">
 <a href="https://github.com/jtmiclat/asgi-sage/actions">
     <img src="https://github.com/jtmiclat/asgi-sage/workflows/Test%20Suite/badge.svg?branch=master" alt="Test Suite">
