@@ -4,7 +4,7 @@ Security Headers Middleware for Asgi App heavily inspired by [flask-talisman](ht
 
 # TODO
 
-- [ ] feature_policy: dict = {}, force_https: bool = True,
+- [x] feature_policy: dict = {}, force_https: bool = True,
 - [x] force_https: bool = False,
 - [x] force_https_permanent: bool = False,
 - [x] frame_options: Optional[str] = "SAMEORIGIN",

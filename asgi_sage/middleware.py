@@ -5,8 +5,8 @@ class SageMiddleware:
     def __init__(
         self,
         app,
-        feature_policy: dict = {},
-        force_https: bool = True,
+        feature_policy: Optional[dict] = None,
+        force_https: bool = False,
         force_https_permanent: bool = False,
         frame_options: Optional[str] = "SAMEORIGIN",
         strict_transport_security: bool = True,
@@ -23,6 +23,7 @@ class SageMiddleware:
         force_file_save: bool = False,
     ) -> None:
         self.app = app
+        self.feature_policy: Optional[dict] = feature_policy
         self.force_https: bool = force_https
         self.force_https_permanent: bool = force_https_permanent
         self.frame_options: Optional[
@@ -61,6 +62,17 @@ class SageMiddleware:
             headers.append((b"referrer-policy", self.referrer_policy))
         return headers
 
+    def _set_feature_policy(self, headers: list) -> list:
+        if self.feature_policy:
+            policy = "; ".join(
+                [
+                    f"{directive} {allowlist}"
+                    for directive, allowlist in self.feature_policy.items()
+                ]
+            ).encode()
+            headers.append((b"feature-policy", policy))
+        return headers
+
     async def redirect_to_https(self, scope, send):
         hostname = next(filter(lambda x: x[0] == b"host", scope["headers"]))[1]
         await send(
@@ -83,6 +95,7 @@ class SageMiddleware:
             headers = response.get("headers", [])
             type_ = response.get("type")
             if headers and type_ == "http.response.start":
+                self._set_feature_policy(headers)
                 self._set_frame_options(headers)
                 self._set_strict_transport_security(headers)
                 self._set_referrer_policy(headers)

@@ -234,3 +234,33 @@ def test_force_https_permanent(app):
     client = TestClient(app, base_url="https://testserver")
     response = client.get("/async-message", allow_redirects=False)
     assert response.status_code == 200
+
+
+def test_feature_policy_empty(app):
+    app.add_middleware(SageMiddleware, feature_policy={})
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert "feature-policy" not in response.headers
+
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "feature-policy" not in response.headers
+
+
+def test_feature_policy_values(app):
+    app.add_middleware(
+        SageMiddleware, feature_policy={"geolocation": "*", "usb": "'self'"}
+    )
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert "feature-policy" in response.headers
+    assert "geolocation *" in response.headers["feature-policy"]
+    assert "usb 'self'" in response.headers["feature-policy"]
+
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "feature-policy" in response.headers
+    assert "geolocation *" in response.headers["feature-policy"]
+    assert "usb 'self'" in response.headers["feature-policy"]
