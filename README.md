@@ -2,6 +2,8 @@
 
 [![Package version](https://badge.fury.io/py/asgi-sage.svg)](https://pypi.org/project/asgi-sage)
 
+[![Test Suite](https://github.com/jtmiclat/asgi-sage/actions)](https://github.com/jtmiclat/asgi-sage/workflows/Test%20Suite/badge.svg)
+
 Security Headers Middleware for Asgi App heavily inspired by [flask-talisman](https://github.com/GoogleCloudPlatform/flask-talisman)
 
 ## Installation
@@ -45,7 +47,6 @@ app = SageMiddleware(app)
 - [ ] Add tests for different ASGI frameworks like [Quart](https://pgjones.gitlab.io/quart/) and [Django 3.0+](https://docs.djangoproject.com/en/3.0/topics/async/)
 - [ ] Properly support websockets
 
-- [ ] Add Code Coverage
 - [ ] Auto Changelog
 
 ## License
