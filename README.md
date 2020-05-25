@@ -1,8 +1,13 @@
 # asgi-sage
 
-[![Package version](https://badge.fury.io/py/asgi-sage.svg)](https://pypi.org/project/asgi-sage)
-
-[![Test Suite](https://github.com/jtmiclat/asgi-sage/actions)](https://github.com/jtmiclat/asgi-sage/workflows/Test%20Suite/badge.svg)
+<p align="center">
+<a href="https://github.com/jtmiclat/asgi-sage/actions">
+    <img src="https://github.com/jtmiclat/asgi-sage/workflows/Test%20Suite/badge.svg?branch=master" alt="Test Suite">
+</a>
+<a href="https://pypi.org/project/asgi-sage/">
+    <img src="https://badge.fury.io/py/asgi-sage.svg" alt="Package version">
+</a>
+</p>
 
 Security Headers Middleware for Asgi App heavily inspired by [flask-talisman](https://github.com/GoogleCloudPlatform/flask-talisman)
 
