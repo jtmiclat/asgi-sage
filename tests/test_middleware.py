@@ -106,6 +106,30 @@ def test_strict_transport_security_max_age_set(app):
     assert str(1000) in response.headers["strict-transport-security"]
 
 
+def test_strict_transport_security_include_subdomain_trur(app):
+    app.add_middleware(
+        SageMiddleware, strict_transport_security_include_subdomains=True
+    )
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert "includeSubDomains" in response.headers["strict-transport-security"]
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "includeSubDomains" in response.headers["strict-transport-security"]
+
+
+def test_strict_transport_security_include_subdomain_false(app):
+    app.add_middleware(
+        SageMiddleware, strict_transport_security_include_subdomains=False
+    )
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert "includeSubDomains" not in response.headers["strict-transport-security"]
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "includeSubDomains" not in response.headers["strict-transport-security"]
+
+
 def test_strict_transport_security_preload_default(app):
     app.add_middleware(SageMiddleware)
     client = TestClient(app)

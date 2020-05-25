@@ -12,6 +12,7 @@ class SageMiddleware:
         strict_transport_security: bool = True,
         strict_transport_security_preload: bool = False,
         strict_transport_security_max_age: int = 60 * 60 * 24 * 365,
+        strict_transport_security_include_subdomains: bool = True,
         content_security_policy: str = "default-src: 'self'",
         content_security_policy_nonce_in: list = [],
         content_security_policy_report_only: bool = False,
@@ -30,6 +31,7 @@ class SageMiddleware:
         self.strict_transport_security: bool = strict_transport_security
         self.strict_transport_security_preload: bool = strict_transport_security_preload
         self.strict_transport_security_max_age: int = strict_transport_security_max_age
+        self.strict_transport_security_include_subdomains: bool = strict_transport_security_include_subdomains
         self.referrer_policy: Optional[
             bytes
         ] = referrer_policy.encode() if referrer_policy else referrer_policy
@@ -48,6 +50,8 @@ class SageMiddleware:
             )
             if self.strict_transport_security_preload:
                 header_content += b"; preload"
+            if self.strict_transport_security_include_subdomains:
+                header_content += b"; includeSubDomains"
             strict_transport_headers = (b"strict-transport-security", header_content)
             headers.append(strict_transport_headers)
         return headers
