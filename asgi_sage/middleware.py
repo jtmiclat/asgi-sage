@@ -74,7 +74,7 @@ class SageMiddleware:
             headers.append((b"feature-policy", policy))
         return headers
 
-    def _set_content_security_policy(self, headers):
+    def _set_content_security_policy(self, headers: list) -> list:
         if self.content_security_policy:
 
             def format_allow_list(allowlist):
@@ -89,6 +89,17 @@ class SageMiddleware:
             headers.append((b"content-security-policy", policy))
 
         return headers
+
+    def _set_cookie(self, headers: list) -> list:
+
+        for key, header in enumerate(headers):
+            if header[0] == b"set-cookie":
+                value = header[1]
+                if self.session_cookie_secure:
+                    value += b"; secure"
+                if self.session_cookie_http_only:
+                    value += b"; httponly"
+                headers[key] = (header[0], value)
 
     async def redirect_to_https(self, scope, send):
         hostname = next(filter(lambda x: x[0] == b"host", scope["headers"]))[1]
@@ -117,6 +128,7 @@ class SageMiddleware:
                 self._set_strict_transport_security(headers)
                 self._set_referrer_policy(headers)
                 self._set_content_security_policy(headers)
+                self._set_cookie(headers)
             return send(response)
 
         return await self.app(scope, receive, send_wrapper)

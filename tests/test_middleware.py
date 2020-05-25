@@ -12,11 +12,17 @@ def app():
 
     @app.route("/sync-message")
     def hi(request):
-        return PlainTextResponse("ok")
+        response = PlainTextResponse("ok")
+        response.set_cookie("key", "value")
+        response.set_cookie("key2", "value2")
+        return response
 
     @app.route("/async-message")
     async def hi2(request):
-        return PlainTextResponse("ok")
+        response = PlainTextResponse("ok")
+        response.set_cookie("key", "value")
+        response.set_cookie("key2", "value2")
+        return response
 
     return app
 
@@ -302,3 +308,39 @@ def test_content_security_policy_values(app):
     assert (
         "media-src media1.com media2.com" in response.headers["content-security-policy"]
     )
+
+
+def test_session_cookie_secure_true(app):
+
+    app.add_middleware(SageMiddleware, session_cookie_secure=True)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert all([v.secure for v in response.cookies]) is True
+
+
+def test_session_cookie_secure_false(app):
+
+    app.add_middleware(SageMiddleware, session_cookie_secure=False)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert all([v.secure for v in response.cookies]) is False
+
+
+def test_session_cookie_http_only_true(app):
+
+    app.add_middleware(SageMiddleware, session_cookie_http_only=True)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert all([v.has_nonstandard_attr("httponly") for v in response.cookies]) is True
+
+
+def test_session_cookie_http_only_false(app):
+
+    app.add_middleware(SageMiddleware, session_cookie_http_only=False)
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert all([v.has_nonstandard_attr("httponly") for v in response.cookies]) is False
