@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asgi-sage"
-version = "0.1.0"
+version = "0.1.1"
 description = "Security Headers for asgi apps"
 authors = ["Jt Miclat <jtmiclat@gmail.com>"]
 license = "MIT"
