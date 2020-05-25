@@ -13,10 +13,7 @@ class SageMiddleware:
         strict_transport_security_preload: bool = False,
         strict_transport_security_max_age: int = 60 * 60 * 24 * 365,
         strict_transport_security_include_subdomains: bool = True,
-        content_security_policy: str = "default-src: 'self'",
-        content_security_policy_nonce_in: list = [],
-        content_security_policy_report_only: bool = False,
-        content_security_policy_report_uri: Optional[str] = None,
+        content_security_policy: Optional[dict] = None,
         referrer_policy: Optional[str] = "strict-origin-when-cross-origin",
         session_cookie_secure: bool = True,
         session_cookie_http_only: bool = True,
@@ -29,10 +26,14 @@ class SageMiddleware:
         self.frame_options: Optional[
             bytes
         ] = frame_options.encode() if frame_options else frame_options
+
         self.strict_transport_security: bool = strict_transport_security
         self.strict_transport_security_preload: bool = strict_transport_security_preload
         self.strict_transport_security_max_age: int = strict_transport_security_max_age
         self.strict_transport_security_include_subdomains: bool = strict_transport_security_include_subdomains
+
+        self.content_security_policy: Optional[dict] = content_security_policy
+
         self.referrer_policy: Optional[
             bytes
         ] = referrer_policy.encode() if referrer_policy else referrer_policy
@@ -73,6 +74,22 @@ class SageMiddleware:
             headers.append((b"feature-policy", policy))
         return headers
 
+    def _set_content_security_policy(self, headers):
+        if self.content_security_policy:
+
+            def format_allow_list(allowlist):
+                return allowlist if isinstance(allowlist, str) else " ".join(allowlist)
+
+            policy = "; ".join(
+                [
+                    f"{directive} {format_allow_list(allowlist)}"
+                    for directive, allowlist in self.content_security_policy.items()
+                ]
+            ).encode()
+            headers.append((b"content-security-policy", policy))
+
+        return headers
+
     async def redirect_to_https(self, scope, send):
         hostname = next(filter(lambda x: x[0] == b"host", scope["headers"]))[1]
         await send(
@@ -99,6 +116,7 @@ class SageMiddleware:
                 self._set_frame_options(headers)
                 self._set_strict_transport_security(headers)
                 self._set_referrer_policy(headers)
+                self._set_content_security_policy(headers)
             return send(response)
 
         return await self.app(scope, receive, send_wrapper)

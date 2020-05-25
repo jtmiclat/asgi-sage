@@ -264,3 +264,41 @@ def test_feature_policy_values(app):
     assert "feature-policy" in response.headers
     assert "geolocation *" in response.headers["feature-policy"]
     assert "usb 'self'" in response.headers["feature-policy"]
+
+
+def test_content_security_policy_empty(app):
+    app.add_middleware(SageMiddleware, content_security_policy={})
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert "content-security-policy" not in response.headers
+
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "content-security-policy" not in response.headers
+
+
+def test_content_security_policy_values(app):
+    app.add_middleware(
+        SageMiddleware,
+        content_security_policy={
+            "default-src": "*",
+            "media-src": ["media1.com", "media2.com"],
+        },
+    )
+    client = TestClient(app)
+    response = client.get("/sync-message")
+    assert response.status_code == 200
+    assert "content-security-policy" in response.headers
+    assert "default-src *" in response.headers["content-security-policy"]
+    assert (
+        "media-src media1.com media2.com" in response.headers["content-security-policy"]
+    )
+
+    response = client.get("/async-message")
+    assert response.status_code == 200
+    assert "content-security-policy" in response.headers
+    assert "default-src *" in response.headers["content-security-policy"]
+    assert (
+        "media-src media1.com media2.com" in response.headers["content-security-policy"]
+    )

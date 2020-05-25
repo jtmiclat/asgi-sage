@@ -12,12 +12,11 @@ Security Headers Middleware for Asgi App heavily inspired by [flask-talisman](ht
 - [x] strict_transport_security_preload: bool = False,
 - [x] strict_transport_security_max_age: int = 60 \* 60 \_ 24 \* 365,
 - [x] strict_transport_security_include_subdomains: bool = True,
-- [ ] content_security_policy: str = "default-src: 'self'",
+- [ ] content_security_policy: Optional[dict] = {"default-src": 'self'},
 - [ ] content_security_policy_nonce_in: list = [],
 - [ ] content_security_policy_report_only: bool = False,
 - [ ] content_security_policy_report_uri: Optional[str] = None,
 - [x] referrer_policy: str = "strict-origin-when-cross-origin",
 - [ ] session_cookie_secure: bool = True,
 - [ ] session_cookie_http_only: bool = True,
-- [ ] force_file_save: bool = False,
 - [ ] Per View override
