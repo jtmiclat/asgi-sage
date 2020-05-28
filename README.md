@@ -33,7 +33,7 @@ app = SageMiddleware(app)
 
 ## Options
 
-- `feature_policy: dict = {}, force_https: bool = True`
+- `feature_policy: dict = {}`
 - `force_https: bool = False`
 - `force_https_permanent: bool = False`
 - `frame_options: Optional[str] = "SAMEORIGIN"`
