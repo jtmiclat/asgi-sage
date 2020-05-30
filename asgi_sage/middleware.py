@@ -38,8 +38,12 @@ class SageMiddleware:
 
         self.content_type_nosniff: bool = content_type_nosniff
 
+    @staticmethod
+    def _has_header(headers, header):
+        return any(map(lambda h: h[0].lower() == header.lower(), headers))
+
     def _set_frame_options(self, headers: list) -> list:
-        if self.frame_options:
+        if self.frame_options and not self._has_header(headers, b"x-frame-options"):
             headers.append((b"x-frame-options", self.frame_options.encode()))
         return headers
 
