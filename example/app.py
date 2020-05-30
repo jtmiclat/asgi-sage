@@ -6,7 +6,7 @@ app = Starlette()
 app.add_middleware(
     SageMiddleware,
     feature_policy={"geolocation": "*", "usb": "'self'"},
-    content_security_policy={"default-src": "'self"},
+    content_security_policy={"default-src": "'self'"},
 )
 
 
