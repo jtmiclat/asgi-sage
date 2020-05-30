@@ -60,15 +60,19 @@ def test_x_frame_options_deny(app):
     assert response.headers["X-Frame-Options"] == "DENY"
 
 
-def test_x_frame_options_none(app):
-    app.add_middleware(SageMiddleware, frame_options=None)
+def test_x_frame_options_override(app):
+    @app.route("/sync-message")
+    def hi(request):
+        response = PlainTextResponse("ok", headers={"x-frame-options": "DENY"})
+        return response
+
+    app.add_middleware(SageMiddleware)
+
     client = TestClient(app)
     response = client.get("/sync-message")
+    response = client.get("/sync-message")
     assert response.status_code == 200
-    assert "X-Frame-Options" not in response.headers
-    response = client.get("/async-message")
-    assert response.status_code == 200
-    assert "X-Frame-Options" not in response.headers
+    assert response.headers["X-Frame-Options"] == "DENY"
 
 
 def test_strict_transport_security_true(app):
